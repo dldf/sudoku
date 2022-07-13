@@ -11,7 +11,7 @@ app.use(express.json())
 
 
 app.post('/solve', (req, res) => {
-    console.log('YOYOYO Here is the reqest:', req)
+    console.log('Here is the reqest:', req)
     console.log(req.body.solution)
     var options = {
         method: 'POST',

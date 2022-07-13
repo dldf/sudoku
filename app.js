@@ -2,12 +2,13 @@ const message = document.getElementById('message')
 const sudokuDiv = document.querySelector('#sudoku-div')
 const solveButton = document.querySelector('#solve-button')
 const numSquares = 9 * 9
+let isSolved = false;
 
 for (let i = 0; i < numSquares; i++) {
     const square = document.createElement('input')
     square.classList.add('square')
     square.setAttribute('type', 'number')
-    square.setAttribute('min', 0)
+    square.setAttribute('min', 1)
     square.setAttribute('max', 9)
     square.setAttribute('onkeyup', 'setPuzzleValue(this)')
     square.setAttribute('onchange', 'setPuzzleValue(this)')
@@ -19,6 +20,17 @@ for (let i = 0; i < numSquares; i++) {
     if ((i >= 3 * 9 && i < 4 * 9) || (i >= 6 * 9 && i < 7 * 9)) {
         square.classList.add('topline')
     }
+
+    if (
+        ((i % 9 < 3 || i % 9 > 5) && (i < 27 || i > 53)) // first and last three columns (minus center three rows)
+        ||
+        ((i % 9 >= 3 && i % 9 <= 5) && (i >= 27 && i <= 53)) // center three columns (minus first and last three rows)
+    ) {
+        square.classList.add('shade1')
+    }
+    else {
+        square.classList.add('shade2')
+    }
 }
 
 function setPuzzleValue(element) {
@@ -27,7 +39,7 @@ function setPuzzleValue(element) {
         element.value = ''
         element.classList.remove('puzzle-value')
     }
-    // blank out the rest of the puzzle (if solved)
+    // blank out the rest of the puzzle
     const inputArray = document.querySelectorAll('input')
     inputArray.forEach(inputArrayElement => {
         if (!inputArrayElement.classList.contains('puzzle-value')) {
@@ -74,7 +86,7 @@ const solve = () => {
     // after getting server.js working, move this all to server.js
     // and instead fetch the route /server (as now done below)
 
-    // var axios = require("axios").default; // using cdn in html instead
+    // var axios = require("axios").default; // at the top of server.js
 
     var options = {
         method: 'POST',
@@ -114,8 +126,8 @@ const solve = () => {
 const solve = () => {
     // data must be an object
     const solutionString = getStringToSolve()
-    const data = {solution: solutionString}
-    console.log('HEYHEYHEY Here is the data', data)
+    const data = { solution: solutionString }
+    console.log('Here is the data', data)
     console.log(JSON.stringify(data))
 
     // the /solve route defined in server.js
@@ -133,6 +145,27 @@ const solve = () => {
             populateValues(!data.solvable, data.solution)
         })
         .catch(error => console.log('error: ', error))
+
+    isSolved = true
+    configureButton()
 }
 
-solveButton.addEventListener('click', solve)
+function clearPuzzle() {
+    const inputArray = document.querySelectorAll('input')
+    inputArray.forEach(inputArrayElement => inputArrayElement.value = '')
+    message.innerText = "Enter the starting digits."
+    isSolved = false;
+    configureButton()
+}
+
+function configureButton() {
+    if (!isSolved) {
+        solveButton.addEventListener('click', solve)
+        solveButton.innerHTML = 'Click to solve'
+    } else {
+        solveButton.addEventListener('click', clearPuzzle)
+        solveButton.innerHTML = 'Clear Puzzle'
+    }
+}
+
+configureButton();

@@ -33,3 +33,24 @@ input {
 .topline {
     border-top: 5px solid black; 
 }
+
+.shade1 {
+    background-color:antiquewhite;
+}
+
+.shade2 {
+    background-color:floralwhite;
+}
+
+#solve-button {
+    padding: 10px;
+    margin: 10px;
+    background-color:firebrick;
+    color:white;
+    border-radius: 10px;
+    border: none;
+}
+
+#solve-button:hover {
+    background-color:rgb(124, 12, 12);
+} 
