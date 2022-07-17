@@ -2,7 +2,6 @@ const message = document.getElementById('message')
 const sudokuDiv = document.querySelector('#sudoku-div')
 const solveButton = document.querySelector('#solve-button')
 const numSquares = 9 * 9
-let isSolved = false;
 
 for (let i = 0; i < numSquares; i++) {
     const square = document.createElement('input')
@@ -39,7 +38,7 @@ function setPuzzleValue(element) {
         element.value = ''
         element.classList.remove('puzzle-value')
     }
-    // blank out the rest of the puzzle
+    // blank out the rest of the puzzle (if solved)
     const inputArray = document.querySelectorAll('input')
     inputArray.forEach(inputArrayElement => {
         if (!inputArrayElement.classList.contains('puzzle-value')) {
@@ -127,8 +126,11 @@ const solve = () => {
     // data must be an object
     const solutionString = getStringToSolve()
     const data = { solution: solutionString }
-    console.log('Here is the data', data)
+    console.log('Here is the data: ', data)
     console.log(JSON.stringify(data))
+
+    message.innerHTML = "Working..."
+    solveButton.style.display = "none"
 
     // the /solve route defined in server.js
     fetch('http://localhost:8000/solve', {
@@ -143,29 +145,20 @@ const solve = () => {
         .then(data => {
             console.log(data)
             populateValues(!data.solvable, data.solution)
+            solveButton.style.display = "block"
         })
         .catch(error => console.log('error: ', error))
 
-    isSolved = true
-    configureButton()
+    clearPuzzle()
 }
 
 function clearPuzzle() {
-    const inputArray = document.querySelectorAll('input')
-    inputArray.forEach(inputArrayElement => inputArrayElement.value = '')
-    message.innerText = "Enter the starting digits."
-    isSolved = false;
-    configureButton()
+    // make button say, 'clear puzzle'
+    solveButton.innerHTML = "Clear Puzzle"
+
+    // refresh page on button click (remove old event listener first)
+    solveButton.removeEventListener('click', solve)
+    solveButton.addEventListener('click', () => { location.reload() })
 }
 
-function configureButton() {
-    if (!isSolved) {
-        solveButton.addEventListener('click', solve)
-        solveButton.innerHTML = 'Click to solve'
-    } else {
-        solveButton.addEventListener('click', clearPuzzle)
-        solveButton.innerHTML = 'Clear Puzzle'
-    }
-}
-
-configureButton();
+solveButton.addEventListener('click', solve)
